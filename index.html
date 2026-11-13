@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="description" content="EDDGA Buff Calculator: วางแผนโบนัส Guild, Donate, Boss, Weapon, Armor และ Refine Pass พร้อมสรุปค่าสถานะรวม">
+  <title>EDDGA Buff Calculator | Hi-Class</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script defer src="js/data.js"></script>
+  <script defer src="js/calculator.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <div class="app-container">
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="EDDGA Buff Calculator หน้าแรก">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span class="brand-text"><strong>EDDGA</strong><small>BUFF CALCULATOR</small></span>
+      </a>
+      <div class="header-actions">
+        <span class="version-label">HI-CLASS · V1.0</span>
+        <button type="button" class="button button-muted" id="example-button">โหลดตัวอย่าง</button>
+        <button type="button" class="button button-muted" id="reset-button">รีเซ็ต</button>
+        <button type="button" class="button button-primary" id="share-button">แชร์บิลด์ <span aria-hidden="true">↗</span></button>
+      </div>
+    </header>
+
+    <section class="hero" aria-label="แนะนำเว็บ">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> CHARACTER BONUS PLANNER</div>
+        <h1>เลือกบัฟให้ครบ <span>จบในหน้าเดียว</span></h1>
+        <p>รวมโบนัสจาก 6 ระบบของ EDDGA Hi-Class เลือกระดับและออฟชั่นที่มีจริง แล้วดูผลรวมพร้อมรายละเอียดการคำนวณทันที</p>
+      </div>
+      <div class="hero-stats" aria-label="สถานะตัวเลือก">
+        <div class="hero-stat"><strong id="active-system-count">0<span>/6</span></strong><small>หมวดที่มีโบนัส</small></div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat"><strong id="chosen-option-count">0<span>/6</span></strong><small>ออฟชั่นที่เลือก</small></div>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <main class="system-column" id="buff-settings">
+        <div class="section-heading">
+          <div><div class="section-kicker">01 — BUFF SETTINGS</div><h2>ตั้งค่าบัฟของตัวละคร</h2></div>
+          <div class="section-hint">เปิด / ปิดหมวดได้โดยไม่ล้างค่าที่เลือก</div>
+        </div>
+
+        <section class="system-card" id="card-guild" data-system="guild" aria-labelledby="heading-guild">
+          <div class="card-top">
+            <div class="card-identity"><span class="index-badge">01</span><div><h3 id="heading-guild">Guild Buff System</h3><p>โบนัสจากระดับกิลด์</p></div></div>
+            <div class="card-actions"><span class="status-badge" id="status-guild">ยังไม่เลือก</span><label class="switch" title="เปิดหรือปิด Guild Buff"><input type="checkbox" data-enable="guild" checked aria-label="เปิดหรือปิด Guild Buff"><span class="switch-track"></span></label><button class="fold-button" type="button" data-fold="guild" aria-label="ย่อหรือขยาย Guild Buff" aria-expanded="true">⌄</button></div>
+          </div>
+          <div class="card-content" id="content-guild">
+            <div class="field-row"><label for="guild-level">เลือกระดับกิลด์</label><select id="guild-level" data-level="guild"></select></div>
+            <div class="bonus-preview" id="preview-guild" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="system-card" id="card-donate" data-system="donate" aria-labelledby="heading-donate">
+          <div class="card-top">
+            <div class="card-identity"><span class="index-badge">02</span><div><h3 id="heading-donate">Donate Rank System</h3><p>โบนัสจากยอดสนับสนุนสะสม</p></div></div>
+            <div class="card-actions"><span class="status-badge" id="status-donate">ยังไม่เลือก</span><label class="switch" title="เปิดหรือปิด Donate Rank"><input type="checkbox" data-enable="donate" checked aria-label="เปิดหรือปิด Donate Rank"><span class="switch-track"></span></label><button class="fold-button" type="button" data-fold="donate" aria-label="ย่อหรือขยาย Donate Rank" aria-expanded="true">⌄</button></div>
+          </div>
+          <div class="card-content" id="content-donate">
+            <div class="field-row"><label for="donate-level">เลือกระดับ Donate Rank</label><select id="donate-level" data-level="donate"></select></div>
+            <div class="requirements" id="requirements-donate"></div>
+            <div class="bonus-preview" id="preview-donate" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="system-card" id="card-boss" data-system="boss" aria-labelledby="heading-boss">
+          <div class="card-top">
+            <div class="card-identity"><span class="index-badge">03</span><div><h3 id="heading-boss">Rank Boss System</h3><p>โบนัสจากภารกิจกำจัดบอส</p></div></div>
+            <div class="card-actions"><span class="status-badge" id="status-boss">ยังไม่เลือก</span><label class="switch" title="เปิดหรือปิด Rank Boss"><input type="checkbox" data-enable="boss" checked aria-label="เปิดหรือปิด Rank Boss"><span class="switch-track"></span></label><button class="fold-button" type="button" data-fold="boss" aria-label="ย่อหรือขยาย Rank Boss" aria-expanded="true">⌄</button></div>
+          </div>
+          <div class="card-content" id="content-boss">
+            <div class="field-row"><label for="boss-level">เลือกระดับ Rank Boss</label><select id="boss-level" data-level="boss"></select></div>
+            <div class="requirements" id="requirements-boss"></div>
+            <div class="bonus-preview" id="preview-boss" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <div class="section-heading section-heading-spaced">
+          <div><div class="section-kicker">02 — REFINE OPTIONS</div><h2>ออฟชั่นจากการตีบวก</h2></div>
+          <div class="section-hint">แต่ละชิ้นเลือกได้ 1 ออฟชั่นเท่านั้น</div>
+        </div>
+
+        <section class="system-card" id="card-weapon" data-system="weapon" aria-labelledby="heading-weapon">
+          <div class="card-top">
+            <div class="card-identity"><span class="index-badge">04</span><div><h3 id="heading-weapon">Weapon Refine Options</h3><p>อาวุธ 1 ชิ้น · เลือก 1 ออฟชั่นที่สุ่มได้จริง</p></div></div>
+            <div class="card-actions"><span class="status-badge" id="status-weapon">ยังไม่เลือก</span><label class="switch" title="เปิดหรือปิด Weapon Refine"><input type="checkbox" data-enable="weapon" checked aria-label="เปิดหรือปิด Weapon Refine"><span class="switch-track"></span></label><button class="fold-button" type="button" data-fold="weapon" aria-label="ย่อหรือขยาย Weapon Refine" aria-expanded="true">⌄</button></div>
+          </div>
+          <div class="card-content" id="content-weapon">
+            <div class="refine-fields">
+              <div class="field"><label for="weapon-type">ประเภทอาวุธ</label><select id="weapon-type"></select></div>
+              <div class="field"><label for="weapon-refine">ระดับตีบวก</label><select id="weapon-refine"></select></div>
+              <div class="field field-full"><label for="weapon-option">ออฟชั่นที่สุ่มได้ <span class="field-tag">เลือกเพียง 1 รายการ</span></label><select id="weapon-option"></select></div>
+            </div>
+            <div class="picked-option" id="weapon-picked" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="system-card" id="card-armor" data-system="armor" aria-labelledby="heading-armor">
+          <div class="card-top">
+            <div class="card-identity"><span class="index-badge">05</span><div><h3 id="heading-armor">Armor Refine Options</h3><p>5 ช่องอุปกรณ์ · ช่องละ 1 ออฟชั่นที่สุ่มได้จริง</p></div></div>
+            <div class="card-actions"><span class="status-badge" id="status-armor">0 / 5 ชิ้น</span><label class="switch" title="เปิดหรือปิด Armor Refine"><input type="checkbox" data-enable="armor" checked aria-label="เปิดหรือปิด Armor Refine"><span class="switch-track"></span></label><button class="fold-button" type="button" data-fold="armor" aria-label="ย่อหรือขยาย Armor Refine" aria-expanded="true">⌄</button></div>
+          </div>
+          <div class="card-content" id="content-armor">
+            <div id="armor-list" class="armor-list"></div>
+            <p class="note note-warning"><span aria-hidden="true">!</span> <strong>ยกเว้น:</strong> Cotton Shirt [1], Adventurer's Suit [1], Jacket [1], Hood [1] และ Sandals [1] ไม่ได้รับออฟชั่นตีบวกตามเอกสารเซิร์ฟเวอร์</p>
+          </div>
+        </section>
+
+        <section class="system-card" id="card-pass" data-system="pass" aria-labelledby="heading-pass">
+          <div class="card-top">
+            <div class="card-identity"><span class="index-badge">06</span><div><h3 id="heading-pass">Refine Pass System</h3><p>โบนัสจากการผ่านเงื่อนไขชุดตีบวก</p></div></div>
+            <div class="card-actions"><span class="status-badge" id="status-pass">ยังไม่เลือก</span><label class="switch" title="เปิดหรือปิด Refine Pass"><input type="checkbox" data-enable="pass" checked aria-label="เปิดหรือปิด Refine Pass"><span class="switch-track"></span></label><button class="fold-button" type="button" data-fold="pass" aria-label="ย่อหรือขยาย Refine Pass" aria-expanded="true">⌄</button></div>
+          </div>
+          <div class="card-content" id="content-pass">
+            <div class="field-row"><label for="pass-level">Set Refine ที่ผ่านเงื่อนไขจริง</label><select id="pass-level" data-level="pass"></select></div>
+            <div class="bonus-preview" id="preview-pass" aria-live="polite"></div>
+            <p class="note"><span aria-hidden="true">i</span> เลือกขั้นที่ได้รับจริงเท่านั้น ระบบนี้ไม่ได้ตรวจอัตโนมัติว่าอุปกรณ์ทุกชิ้นผ่านเงื่อนไข Set หรือไม่</p>
+          </div>
+        </section>
+      </main>
+
+      <aside class="result-column" id="result-section" aria-label="สรุปโบนัสรวม">
+        <div class="result-panel">
+          <div class="result-panel-head"><div><div class="section-kicker">LIVE TOTAL</div><h2>สรุปโบนัสรวม</h2><p>อัปเดตอัตโนมัติจากตัวเลือกที่เปิดอยู่</p></div><span class="live-indicator" aria-label="กำลังคำนวณแบบเรียลไทม์"><span></span> LIVE</span></div>
+          <div class="highlight-grid" id="highlight-grid"></div>
+          <div class="summary-divider"><span>โบนัสทั้งหมดที่ได้รับ</span><small id="stat-count">0 รายการ</small></div>
+          <div class="stat-list" id="stat-list" aria-live="polite"></div>
+          <p class="calc-notice"><strong>วิธีคิด:</strong> รวมค่าประเภทเดียวกันแบบบวกตรง แยกตัวเลขคงที่ออกจาก % และไม่คำนวณสูตรดาเมจสุดท้ายของเกม กดแต่ละบรรทัดเพื่อดูแหล่งที่มา</p>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <div><strong>EDDGA Buff Calculator</strong><p>เครื่องมือช่วยวางแผนบัฟ ไม่ใช่เครื่องมืออย่างเป็นทางการของเซิร์ฟเวอร์</p></div>
+      <div class="source-links">
+        <span>ข้อมูลอ้างอิง:</span>
+        <a href="https://eddga-hiclass.gitbook.io/eddga-hiclass-docs/refine-option-system/weapon-refine-options" target="_blank" rel="noopener noreferrer">Weapon</a>
+        <a href="https://eddga-hiclass.gitbook.io/eddga-hiclass-docs/refine-option-system/armor-refine-options" target="_blank" rel="noopener noreferrer">Armor</a>
+        <a href="https://eddga-hiclass.gitbook.io/eddga-hiclass-docs/refine-pass-system" target="_blank" rel="noopener noreferrer">Refine Pass</a>
+      </div>
+    </footer>
+  </div>
+  <button class="mobile-jump" type="button" id="mobile-jump" aria-label="ดูสรุปโบนัสรวม"><span>ดูโบนัสรวม</span><strong id="mobile-drop">Drop +0%</strong><span aria-hidden="true">↑</span></button>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
