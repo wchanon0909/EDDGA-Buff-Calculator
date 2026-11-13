@@ -6,10 +6,430 @@
   <meta name="theme-color" content="#0b1220">
   <meta name="description" content="EDDGA Buff Calculator: วางแผนโบนัส Guild, Donate, Boss, Weapon, Armor และ Refine Pass พร้อมสรุปค่าสถานะรวม">
   <title>EDDGA Buff Calculator | Hi-Class</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script defer src="js/data.js"></script>
-  <script defer src="js/calculator.js"></script>
-  <script defer src="js/app.js"></script>
+  <style>
+:root{
+  color-scheme:dark;
+  --bg:#0a111e;--panel:#131e2e;--panel-alt:#182638;--panel-deep:#0d1827;
+  --border:#2a394d;--border-soft:#243248;--text:#e8edf5;--muted:#9aa9bc;
+  --muted-dim:#73859c;--gold:#e9c184;--green:#66dac3;--cyan:#9bdce3;
+  --radius:16px;--shadow:0 18px 48px rgba(0,0,0,.18);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;overflow-x:hidden;background:var(--bg);color:var(--text);font-family:Inter,"Noto Sans Thai","Leelawadee UI",Tahoma,Arial,sans-serif;font-size:14px;line-height:1.6;min-width:320px}
+button,select{font:inherit}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid rgba(102,218,195,.95);outline-offset:3px}
+[hidden]{display:none!important}
+.ambient{position:absolute;z-index:-1;pointer-events:none;filter:blur(70px);opacity:.5}
+.ambient-one{top:-140px;left:-170px;width:680px;height:540px;background:radial-gradient(ellipse,rgba(56,109,126,.27),transparent 68%)}
+.ambient-two{right:-180px;top:380px;width:540px;height:650px;background:radial-gradient(ellipse,rgba(128,95,54,.14),transparent 65%)}
+.app-container{width:min(1380px,calc(100% - 72px));margin:0 auto}
+.site-header{min-height:88px;display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid var(--border-soft)}
+.brand{display:inline-flex;align-items:center;gap:12px;flex-shrink:0}
+.brand-mark{width:42px;height:42px;display:grid;place-items:center;background:linear-gradient(145deg,#d9b980,#f2d79f);color:#27313a;border-radius:12px;font-size:25px;box-shadow:0 6px 24px rgba(221,172,91,.14)}
+.brand-text{display:flex;flex-direction:column;line-height:1.25;letter-spacing:.03em}
+.brand-text strong{font-size:20px;font-weight:800;letter-spacing:.12em}
+.brand-text small{font-size:10px;letter-spacing:.14em;color:#bec9d6;font-weight:700;margin-top:3px}
+.header-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.version-label{font-size:11px;letter-spacing:.11em;color:var(--muted-dim);font-weight:750;margin-right:11px}
+.button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:36px;border-radius:9px;padding:8px 14px;border:1px solid var(--border);font-size:12px;font-weight:750;white-space:nowrap;transition:background .16s,border-color .16s,transform .16s}
+.button:active{transform:translateY(1px)}
+.button-muted{background:#172235;color:#d3dce9}
+.button-muted:hover{background:#1d2d42;border-color:#53667b}
+.button-primary{background:var(--gold);border-color:var(--gold);color:#1c2937}
+.button-primary:hover{background:#f5d29d}
+.hero{display:flex;justify-content:space-between;align-items:center;gap:34px;padding:38px 0 44px}
+.hero-copy{max-width:760px}
+.eyebrow,.section-kicker{color:var(--green);font-size:11px;letter-spacing:.15em;font-weight:750}
+.eyebrow{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.eyebrow-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px rgba(102,218,195,.10)}
+h1,h2,h3,p{margin-top:0}
+h1{margin-bottom:10px;font-size:clamp(30px,3.1vw,44px);line-height:1.27;font-weight:800;letter-spacing:-.035em}
+h1 span{color:var(--gold)}
+.hero-copy>p{margin:0;line-height:1.9;color:var(--muted);font-size:14px;max-width:670px}
+.hero-stats{display:flex;gap:26px;align-items:center;padding:22px 28px;flex-shrink:0;border-radius:16px;background:rgba(22,36,51,.7);border:1px solid var(--border-soft)}
+.hero-stat{display:flex;flex-direction:column;gap:1px;text-align:center;min-width:87px}
+.hero-stat strong{font-size:30px;line-height:1.15;letter-spacing:-.025em;font-variant-numeric:tabular-nums}
+.hero-stat strong span{font-size:14px;color:var(--muted-dim);font-weight:500}
+.hero-stat small{font-size:11px;color:var(--muted)}
+.hero-stat-divider{height:36px;width:1px;background:var(--border)}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(355px,418px);align-items:start;gap:28px}
+.system-column{min-width:0}
+.section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin-bottom:17px}
+.section-heading h2,.result-panel-head h2{font-size:22px;line-height:1.35;margin:6px 0 0;font-weight:800}
+.section-hint{font-size:11px;color:var(--muted-dim);text-align:right}
+.section-heading-spaced{margin-top:28px}
+.system-card{border:1px solid var(--border);background:linear-gradient(165deg,#162235 0%,#121d2d 100%);border-radius:var(--radius);margin-bottom:13px;box-shadow:0 10px 30px rgba(0,0,0,.09);overflow:hidden;scroll-margin-top:18px}
+.system-card.is-off{opacity:.72}
+.card-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 20px}
+.card-identity{display:flex;align-items:center;gap:13px;min-width:0}
+.index-badge{height:36px;width:36px;flex-shrink:0;display:grid;place-items:center;border-radius:10px;background:rgba(233,193,132,.12);border:1px solid rgba(233,193,132,.20);font-size:12px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.card-identity h3{margin:0 0 2px;font-size:15px;font-weight:800;line-height:1.3}
+.card-identity p{margin:0;font-size:11px;color:var(--muted)}
+.card-actions{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.status-badge{color:var(--muted);border:1px solid var(--border-soft);padding:2px 9px;border-radius:20px;font-weight:700;font-size:10px;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis}
+.status-badge.is-selected{color:var(--green);border-color:rgba(102,218,195,.26);background:rgba(102,218,195,.07)}
+.switch{display:inline-flex;position:relative;width:36px;height:21px;flex-shrink:0;cursor:pointer}
+.switch input{position:absolute;opacity:0;inset:0;width:100%;height:100%;cursor:pointer;margin:0}
+.switch-track{width:36px;height:21px;border-radius:100px;background:#405065;transition:background .2s;position:relative;pointer-events:none}
+.switch-track:after{content:"";position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;background:#eef2f8;transition:transform .2s}
+.switch input:checked+.switch-track{background:#438e82}
+.switch input:checked+.switch-track:after{transform:translateX(15px)}
+.switch input:focus-visible+.switch-track{outline:2px solid var(--green);outline-offset:3px}
+.fold-button{border:0;background:transparent;color:var(--muted);padding:4px 5px;font-size:23px;line-height:1;font-weight:500;transition:transform .2s;min-width:24px}
+.fold-button[aria-expanded="false"]{transform:rotate(-90deg)}
+.card-content{border-top:1px solid var(--border-soft);padding:19px 20px 20px}
+.field-row{display:grid;grid-template-columns:minmax(150px,1fr) minmax(180px,1.3fr);align-items:center;gap:18px}
+.field-row label,.field>label,.armor-control label{display:block;color:#c4d0de;font-size:12px;font-weight:700;margin-bottom:8px}
+.field-row>label{margin:0}
+select{display:block;background:#0e1928;border:1px solid #35455a;border-radius:9px;color:#f3f6fb;width:100%;min-height:40px;padding:9px 36px 9px 12px;outline:0;cursor:pointer;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23a8b9c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="m6 9 6 6 6-6"/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:calc(100% - 12px) 50%;font-size:12px;font-weight:650;transition:border-color .18s}
+select:hover:not(:disabled){border-color:#71879a}
+select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(102,218,195,.10)}
+select:disabled{opacity:.43;cursor:not-allowed}
+select option{color:var(--text);background:#142338}
+.bonus-preview{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px;min-height:23px}
+.preview-pill{display:inline-flex;align-items:center;gap:5px;border:1px solid #33465a;background:rgba(10,23,37,.50);border-radius:7px;padding:4px 9px;line-height:1.5;font-size:11px}
+.preview-pill>span:first-child{color:#b4c2d2}
+.preview-pill strong{color:var(--green);font-weight:800}
+.preview-empty{color:var(--muted-dim);font-size:12px;padding:2px 0}
+.requirements{display:flex;align-items:center;flex-wrap:wrap;gap:11px;color:var(--muted);font-size:11px;margin-top:12px}
+.requirement-chip{display:inline-flex;align-items:center;gap:7px;color:#c6d3df}
+.requirement-chip:before{content:"•";color:var(--gold)}
+.refine-fields{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,.8fr);gap:14px}
+.field-full{grid-column:1/-1}
+.field-tag{display:inline-flex;color:var(--green);font-size:10px;font-weight:650;margin-left:5px}
+.picked-option{margin-top:13px;border:1px dashed #3c5164;border-radius:9px;padding:10px 13px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.picked-option.active{color:#d5e6e7;border-color:rgba(102,218,195,.39);background:rgba(78,158,139,.07)}
+.picked-option strong{color:var(--green);font-size:14px}
+.armor-list{display:flex;flex-direction:column;gap:11px}
+.armor-item{display:grid;grid-template-columns:minmax(93px,1fr) minmax(105px,.95fr) minmax(150px,1.9fr);gap:11px;align-items:end;padding:14px 12px;background:rgba(9,20,32,.45);border:1px solid #26364b;border-radius:11px}
+.armor-ident{display:flex;flex-direction:column;align-self:center;line-height:1.4}
+.armor-ident strong{font-size:13px}
+.armor-ident small{font-size:10px;color:var(--muted)}
+.armor-control label{font-size:10px;margin-bottom:5px;color:var(--muted)}
+.armor-control select{font-size:11px;min-height:36px;padding:7px 27px 7px 9px;background-position:calc(100% - 7px) 50%}
+.armor-value{grid-column:1/-1;display:none;justify-content:flex-end;gap:8px;font-size:11px;color:#b9cddd}
+.armor-value.is-set{display:flex}
+.armor-value strong{color:var(--green)}
+.note{color:var(--muted);font-size:11px;line-height:1.85;margin:14px 0 0;display:flex;align-items:flex-start;gap:7px}
+.note>span{display:inline-flex;width:17px;height:17px;flex:0 0 17px;align-items:center;justify-content:center;border:1px solid #4c6377;color:#b5c9d4;border-radius:50%;font-weight:800;font-style:normal;margin-top:1px}
+.note-warning{color:#bdc1c9}
+.note-warning>span{border-color:#906e41;color:var(--gold)}
+.note strong{color:#e3c594}
+.result-column{min-width:0}
+.result-panel{background:linear-gradient(180deg,#1b2a3a 0%,#131f2f 100%);border:1px solid #354b5d;border-radius:18px;box-shadow:var(--shadow);position:sticky;top:22px;max-height:calc(100vh - 44px);overflow:auto;scrollbar-width:thin;scrollbar-color:#42566b transparent}
+.result-panel-head{padding:22px 22px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.result-panel-head h2{font-size:20px;margin-top:5px}
+.result-panel-head p{font-size:11px;color:var(--muted);margin:6px 0 0}
+.live-indicator{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(102,218,195,.24);color:#9aead6;border-radius:30px;font-size:9px;letter-spacing:.06em;font-weight:800;padding:4px 8px;white-space:nowrap}
+.live-indicator>span{width:6px;height:6px;border-radius:50%;background:#6be2c6;box-shadow:0 0 0 3px rgba(102,218,195,.10)}
+.highlight-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:0 22px 20px}
+.highlight-tile{border:1px solid #39506a;background:#122033;border-radius:12px;min-height:86px;padding:13px 14px;display:flex;flex-direction:column;justify-content:center}
+.highlight-tile small{font-size:10px;letter-spacing:.03em;color:#a7b7c8}
+.highlight-tile strong{display:block;color:#e8c188;font-size:27px;font-weight:800;letter-spacing:-.03em;line-height:1.25;margin-top:5px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.highlight-tile:nth-child(2) strong{color:#a6e0e0}
+.highlight-tile:nth-child(3) strong,.highlight-tile:nth-child(4) strong{color:#a7e7ce}
+.summary-divider{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 22px;background:#101e2d;border-top:1px solid #314155;border-bottom:1px solid #314155;font-weight:800;font-size:12px}
+.summary-divider small{font-size:10px;color:var(--muted);font-weight:600}
+.stat-list{padding:8px 13px 10px;max-height:330px;overflow:auto;scrollbar-width:thin;scrollbar-color:#496075 transparent}
+.stat-group-title{color:#94abbf;font-size:10px;letter-spacing:.05em;font-weight:800;padding:12px 9px 7px}
+.stat-detail{border-radius:8px;margin-bottom:3px;overflow:hidden}
+.stat-detail[open]{background:#1c2d3f}
+.stat-detail>summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:7px;padding:8px 9px;border-radius:8px;font-size:11px}
+.stat-detail>summary::-webkit-details-marker{display:none}
+.stat-detail>summary:hover{background:#25384c}
+.stat-summary-name{color:#c8d6e2;display:flex;align-items:center;gap:7px;min-width:0}
+.stat-summary-name:before{content:'›';color:#7593a6;font-size:17px;line-height:1;transition:transform .2s}
+.stat-detail[open] .stat-summary-name:before{transform:rotate(90deg)}
+.stat-summary-value{color:var(--green);font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.breakdown-entries{border-top:1px solid #3b4c5d;padding:5px 11px 9px;margin-left:14px}
+.breakdown-entry{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:#a5b8c9;padding:3px 0}
+.breakdown-entry strong{color:#c5ddda;font-weight:700;white-space:nowrap}
+.empty-stats{text-align:center;color:var(--muted);font-size:12px;padding:42px 20px}
+.empty-stats span{display:block;font-size:28px;color:#788c9a;margin-bottom:7px}
+.calc-notice{margin:0;border-top:1px solid var(--border);padding:16px 22px 20px;font-size:10px;line-height:1.85;color:#8c9eb1}
+.calc-notice strong{color:#b4c6d6}
+.site-footer{margin-top:40px;padding:25px 0 32px;border-top:1px solid var(--border-soft);display:flex;justify-content:space-between;align-items:flex-start;gap:15px;color:var(--muted-dim);font-size:11px}
+.site-footer strong{color:#c8d7e5;letter-spacing:.03em}
+.site-footer p{margin:4px 0 0}
+.source-links{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+.source-links a{color:#b7d7ce;text-decoration:underline;text-decoration-color:#5c7b7f;text-underline-offset:3px}
+.source-links a:hover{color:var(--green)}
+.mobile-jump{display:none}
+.toast{pointer-events:none;position:fixed;z-index:99;bottom:25px;left:50%;transform:translate(-50%,16px);max-width:min(420px,calc(100% - 40px));background:#28493f;border:1px solid #63ad9a;color:#e3fcf2;font-weight:700;font-size:12px;border-radius:9px;padding:11px 17px;box-shadow:0 12px 40px rgba(0,0,0,.32);opacity:0;transition:opacity .2s,transform .2s;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:1150px){
+  .app-container{width:min(100% - 48px,1100px)}
+  .workspace{grid-template-columns:minmax(0,1fr) minmax(305px,360px);gap:19px}
+  .version-label{display:none}
+  .hero-stats{padding:20px 15px;gap:14px}
+  .hero-stat{min-width:65px}
+  .armor-item{grid-template-columns:1fr 1fr}
+  .armor-ident{grid-column:1/-1;flex-direction:row;gap:8px;align-items:baseline}
+  .card-top,.card-content{padding-left:15px;padding-right:15px}
+  .card-actions{gap:7px}
+}
+@media(max-width:850px){
+  .app-container{width:min(100% - 36px,760px)}
+  .workspace{grid-template-columns:1fr;gap:24px}
+  .result-panel{position:static;max-height:none;overflow:visible}
+  .stat-list{max-height:none;overflow:visible}
+  .hero{align-items:flex-start;padding:30px 0;gap:18px}
+  .hero-stats{margin-top:18px}
+  .section-heading-spaced{margin-top:35px}
+  .site-footer{padding-bottom:94px}
+  .mobile-jump{position:fixed;z-index:50;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(500px,calc(100% - 28px));display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #65a99e;background:#24483f;color:#e9f7f2;border-radius:12px;min-height:48px;padding:10px 17px;box-shadow:0 12px 32px rgba(0,0,0,.4);font-weight:750;font-size:12px}
+  .mobile-jump strong{color:#e7c691;font-size:14px}
+  #result-section{scroll-margin-top:15px}
+}
+@media(max-width:600px){
+  .app-container{width:calc(100% - 26px)}
+  .site-header{gap:8px;min-height:77px;flex-wrap:wrap;padding:11px 0}
+  .brand-mark{width:33px;height:33px;font-size:20px;border-radius:9px}
+  .brand{gap:8px}
+  .brand-text strong{font-size:16px}
+  .brand-text small{font-size:8px}
+  .header-actions{gap:6px}
+  .header-actions .button{min-height:32px;padding:6px 8px;font-size:10px}
+  #example-button{display:inline-flex}
+  .hero{display:block;padding:27px 0 29px}
+  .eyebrow{font-size:10px}
+  h1{font-size:31px;line-height:1.35}
+  .hero-copy>p{font-size:12px}
+  .hero-stats{margin-top:22px;justify-content:center;gap:22px;padding:13px 22px}
+  .hero-stat strong{font-size:24px}
+  .hero-stat{min-width:90px}
+  .section-heading{align-items:flex-start}
+  .section-heading h2{font-size:19px}
+  .section-hint{display:none}
+  .card-top{padding:15px 12px;gap:8px}
+  .card-content{padding:15px 12px}
+  .card-identity{gap:9px}
+  .index-badge{width:31px;height:31px;font-size:10px}
+  .card-identity h3{font-size:12.5px}
+  .card-identity p{font-size:10px}
+  .card-actions{gap:6px}
+  .status-badge{display:none}
+  .switch{width:33px;height:20px}
+  .switch-track{width:33px;height:20px}
+  .switch-track:after{width:14px;height:14px}
+  .switch input:checked+.switch-track:after{transform:translateX(13px)}
+  .field-row{grid-template-columns:1fr;gap:7px}
+  .field-row>label{font-size:11px}
+  .refine-fields{gap:10px}
+  .field label{font-size:11px}
+  .field-tag{display:block;margin-left:0}
+  .armor-item{padding:12px 10px}
+  .armor-control select{font-size:10px}
+  .result-panel-head{padding:19px 16px 16px}
+  .highlight-grid{padding:0 16px 18px}
+  .summary-divider{padding-left:16px;padding-right:16px}
+  .calc-notice{padding-left:16px;padding-right:16px}
+  .site-footer{flex-direction:column;gap:13px}
+  .source-links{justify-content:flex-start}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/* ==========================================================
+   V1.1 COMPACT - tighter layout without changing calculations
+   ========================================================== */
+:root{--radius:12px;--shadow:0 10px 26px rgba(0,0,0,.16)}
+body{font-size:13px;line-height:1.5}
+.app-container{width:min(1420px,calc(100% - 40px))}
+.site-header{min-height:63px;gap:14px}
+.brand{gap:9px}
+.brand-mark{width:34px;height:34px;border-radius:9px;font-size:20px}
+.brand-text strong{font-size:17px;letter-spacing:.095em}
+.brand-text small{font-size:9px;letter-spacing:.1em;margin-top:1px}
+.header-actions{gap:6px}
+.version-label{font-size:9px;letter-spacing:.07em;margin-right:6px}
+.button{min-height:32px;padding:6px 11px;font-size:11px;border-radius:8px}
+.hero{padding:16px 0 19px;gap:18px}
+.hero-copy{display:flex;align-items:center;gap:15px;max-width:none;min-width:0;flex-wrap:wrap}
+.eyebrow{margin:0;font-size:9px;letter-spacing:.11em;white-space:nowrap}
+.eyebrow-dot{width:6px;height:6px}
+h1{font-size:clamp(18px,2vw,23px);line-height:1.2;letter-spacing:-.02em;margin:0}
+.hero-stats{padding:7px 12px;gap:11px;border-radius:10px}
+.hero-stat{min-width:78px;flex-direction:row;align-items:center;justify-content:center;gap:7px}
+.hero-stat strong{font-size:20px}
+.hero-stat strong span{font-size:11px}
+.hero-stat small{font-size:10px;line-height:1.15;text-align:left}
+.hero-stat-divider{height:21px}
+.workspace{grid-template-columns:minmax(0,1fr) minmax(310px,340px);gap:16px}
+.section-heading{align-items:center;margin-bottom:9px}
+.section-kicker{font-size:9px;letter-spacing:.1em}
+.section-heading h2{font-size:16px;margin:1px 0 0}
+.section-hint{font-size:10px}
+.section-heading-spaced{margin-top:17px}
+.quick-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;align-items:stretch}
+.quick-settings-grid #card-boss{grid-column:1/-1}
+.system-card{margin-bottom:9px;box-shadow:none}
+.quick-settings-grid .system-card{margin-bottom:0}
+.card-top{padding:10px 12px;gap:7px}
+.card-identity{gap:9px}
+.index-badge{width:27px;height:27px;border-radius:7px;font-size:10px}
+.card-identity h3{font-size:13px;margin:0;line-height:1.35}
+.card-identity p{display:none}
+.card-actions{gap:7px}
+.status-badge{font-size:10px;padding:2px 7px;max-width:94px}
+.switch{width:32px;height:19px}
+.switch-track{width:32px;height:19px}
+.switch-track:after{width:13px;height:13px}
+.switch input:checked+.switch-track:after{transform:translateX(13px)}
+.fold-button{padding:2px 3px;font-size:20px;min-width:21px}
+.card-content{padding:10px 12px 12px}
+.field-row{grid-template-columns:minmax(0,.8fr) minmax(130px,1.3fr);gap:8px}
+.field-row>label,.field>label{font-size:10px}
+.field>label{margin-bottom:5px}
+select{min-height:34px;padding:6px 29px 6px 9px;font-size:11px;border-radius:7px;background-position:calc(100% - 7px) 50%}
+.bonus-preview{margin-top:8px;gap:4px;min-height:0}
+.preview-pill{gap:4px;border-radius:6px;padding:2px 6px;font-size:10px;line-height:1.45}
+.preview-empty{font-size:10px}
+.requirements{margin-top:6px;gap:8px;font-size:10px}
+.requirement-chip{gap:4px}
+.refine-fields{grid-template-columns:minmax(0,1.55fr) minmax(0,.8fr) minmax(0,1.8fr);gap:9px}
+.refine-fields .field-full{grid-column:auto}
+.field-tag{font-size:9px}
+.picked-option{margin-top:8px;padding:6px 9px;font-size:10px;border-radius:7px;min-height:30px}
+.picked-option strong{font-size:12px}
+/* Table-style equipment editor: one row per item, not five large cards. */
+.armor-table-header,.armor-item{display:grid;grid-template-columns:74px 106px minmax(0,1fr) 74px;gap:8px;align-items:center}
+.armor-table-header{padding:6px 10px;background:#1a293b;color:#a4b5c8;border:1px solid #2b3f53;border-bottom:0;border-radius:8px 8px 0 0;font-size:10px;font-weight:700}
+.armor-list{gap:0;border:1px solid #2b3f53;border-radius:0 0 8px 8px;overflow:hidden}
+.armor-item{border:0;border-radius:0;border-bottom:1px solid #26364b;background:rgba(9,20,32,.22);padding:6px 10px;min-height:46px}
+.armor-item:last-child{border-bottom:0}
+.armor-item:nth-child(even){background:rgba(9,20,32,.43)}
+.armor-ident{align-self:center;flex-direction:row;align-items:center;gap:4px}
+.armor-ident strong{font-size:11px}
+.armor-ident small{display:none}
+.armor-control label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.armor-control select{min-height:31px;padding:5px 24px 5px 7px;font-size:10px;border-radius:6px;background-position:calc(100% - 6px) 50%}
+.armor-value{grid-column:auto;justify-content:flex-end;gap:3px;font-size:9px;line-height:1.25;text-align:right;overflow:hidden}
+.armor-value.is-set{display:flex;flex-wrap:wrap}
+.armor-value span{display:none}
+.armor-value strong{font-size:11px;white-space:nowrap}
+.compact-note{margin-top:8px;font-size:10px;line-height:1.6;color:#a3b2c3}
+.compact-note>summary{display:list-item;cursor:pointer;list-style:inside;color:#d2b98b}
+.compact-note p{padding:5px 0 0 14px;margin:0;color:#aab9c8}
+.note{margin:8px 0 0;font-size:10px;line-height:1.5}
+.note>span{width:14px;height:14px;flex-basis:14px;font-size:9px}
+.result-panel{top:12px;max-height:calc(100vh - 24px);border-radius:12px}
+.result-panel-head{padding:12px 13px 10px}
+.result-panel-head h2{font-size:17px;margin-top:1px}
+.result-panel-head p{font-size:10px;margin:3px 0 0}
+.live-indicator{padding:3px 6px;font-size:9px}
+.highlight-grid{gap:6px;padding:0 12px 11px}
+.highlight-tile{min-height:56px;padding:7px 10px;border-radius:8px}
+.highlight-tile small{font-size:9px}
+.highlight-tile strong{font-size:21px;line-height:1.1;margin-top:4px}
+.summary-divider{padding:8px 12px;font-size:11px}
+.stat-list{padding:3px 8px 6px;max-height:290px}
+.stat-group-title{padding:7px 6px 3px;font-size:9px}
+.stat-detail>summary{padding:5px 7px;font-size:10px;gap:6px}
+.stat-detail{margin-bottom:0}
+.breakdown-entries{padding:4px 8px 6px}
+.breakdown-entry{font-size:10px;padding:2px 0}
+.calc-notice{padding:9px 13px 11px;font-size:9px;line-height:1.5}
+.site-footer{margin-top:18px;padding:12px 0 20px;font-size:10px}
+.site-footer p{margin:2px 0 0}
+@media(max-width:1180px){
+  .app-container{width:calc(100% - 32px)}
+  .workspace{grid-template-columns:minmax(0,1fr) minmax(288px,320px);gap:12px}
+  .quick-settings-grid{grid-template-columns:1fr;gap:0}
+  .quick-settings-grid #card-boss{grid-column:auto}
+  .quick-settings-grid .system-card{margin-bottom:8px}
+  .refine-fields{grid-template-columns:minmax(0,1.5fr) minmax(0,.75fr);gap:8px}
+  .refine-fields .field-full{grid-column:1/-1}
+  .armor-table-header,.armor-item{grid-template-columns:58px 91px minmax(0,1fr) 50px;gap:6px}
+  .armor-table-header,.armor-item{padding-left:7px;padding-right:7px}
+  .armor-value strong{font-size:10px}
+}
+@media(max-width:850px){
+  .app-container{width:calc(100% - 28px)}
+  .workspace{grid-template-columns:1fr;gap:12px}
+  .quick-settings-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .quick-settings-grid .system-card{margin-bottom:0}
+  .quick-settings-grid #card-boss{grid-column:1/-1}
+  .hero{padding:13px 0 15px}
+  .hero-stats{margin:0}
+  .result-panel{position:static;max-height:none;overflow:visible}
+  .stat-list{max-height:none;overflow:visible}
+  .section-heading-spaced{margin-top:17px}
+  .site-footer{padding-bottom:78px}
+  .mobile-jump{min-height:41px;padding:7px 13px;font-size:11px;border-radius:9px}
+  .mobile-jump strong{font-size:12px}
+}
+@media(max-width:620px){
+  .app-container{width:calc(100% - 20px)}
+  .site-header{flex-wrap:nowrap;min-height:57px;padding:7px 0;gap:5px}
+  .brand{gap:6px}
+  .brand-mark{width:30px;height:30px;font-size:18px;border-radius:7px}
+  .brand-text strong{font-size:13px}
+  .brand-text small{font-size:7px;letter-spacing:.06em}
+  .header-actions{flex-wrap:nowrap;gap:4px}
+  .header-actions .button{min-height:30px;padding:6px 7px;font-size:10px}
+  .header-actions #example-button{display:none}
+  .hero{display:flex;align-items:center;padding:11px 0 12px;gap:7px}
+  .hero-copy{display:block;flex:1}
+  .eyebrow{font-size:8px;margin-bottom:3px;letter-spacing:.02em;white-space:normal}
+  h1{font-size:16px;line-height:1.25}
+  .hero-stats{display:flex;flex-shrink:0;gap:8px;padding:6px 8px}
+  .hero-stat{flex-direction:column;gap:0;min-width:40px}
+  .hero-stat strong{font-size:17px}
+  .hero-stat strong span{font-size:9px}
+  .hero-stat small{font-size:8px;line-height:1.2;text-align:center}
+  .hero-stat-divider{height:25px}
+  .section-heading{margin-bottom:8px}
+  .section-heading h2{font-size:15px}
+  .quick-settings-grid{grid-template-columns:1fr;gap:0}
+  .quick-settings-grid .system-card{margin-bottom:7px}
+  .card-top{padding:8px 10px}
+  .card-content{padding:8px 10px 10px}
+  .card-identity h3{font-size:12px}
+  .index-badge{width:24px;height:24px;font-size:9px}
+  .status-badge{display:inline-flex;max-width:66px;font-size:9px;padding:1px 6px}
+  .card-actions{gap:5px}
+  .field-row{grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr);gap:7px}
+  .field-row>label{font-size:10px}
+  .bonus-preview{margin-top:6px;gap:4px}
+  .preview-pill{font-size:9px;padding:2px 5px}
+  .requirements{margin-top:5px;font-size:9px}
+  .refine-fields{grid-template-columns:1.6fr .8fr}
+  .refine-fields .field-full{grid-column:1/-1}
+  .field-tag{display:inline;margin-left:3px}
+  .armor-table-header,.armor-item{grid-template-columns:53px 90px minmax(0,1fr);gap:5px}
+  .armor-table-header{font-size:9px}
+  .armor-table-header span:last-child{display:none}
+  .armor-value{display:none!important}
+  .armor-item{min-height:42px;padding:5px 6px}
+  .armor-control select{font-size:10px;min-height:30px}
+  .result-panel-head{padding:12px 12px 10px}
+  .highlight-grid{grid-template-columns:repeat(3,minmax(0,1fr));padding:0 12px 11px}
+  .highlight-tile{min-height:55px;padding:7px 8px}
+  .highlight-tile small{font-size:9px}
+  .highlight-tile strong{font-size:19px}
+  .calc-notice{font-size:9px}
+  .site-footer{margin-top:15px}
+}
+@media(max-width:370px){
+  .status-badge{display:none}
+  .header-actions .button{padding:6px;font-size:9px}
+  .armor-table-header,.armor-item{grid-template-columns:46px 80px minmax(0,1fr);gap:4px}
+  .armor-ident strong{font-size:10px}
+  .armor-control select{font-size:9px;padding-left:5px;padding-right:18px;background-position:calc(100% - 3px) 50%}
+}
+/* Keep decorative glow from enlarging the document's scroll width. */
+.ambient{display:none}
+/* Neutralize the older tablet two-row armor card layout. */
+.armor-ident{grid-column:auto}
+@media(max-width:620px){
+  .header-actions #example-button{display:inline-flex}
+  .preview-pill{font-size:10px}
+}
+
+  </style>
 </head>
 <body>
   <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -21,21 +441,20 @@
         <span class="brand-text"><strong>EDDGA</strong><small>BUFF CALCULATOR</small></span>
       </a>
       <div class="header-actions">
-        <span class="version-label">HI-CLASS · V1.0</span>
+        <span class="version-label">V1.1 COMPACT</span>
         <button type="button" class="button button-muted" id="example-button">โหลดตัวอย่าง</button>
         <button type="button" class="button button-muted" id="reset-button">รีเซ็ต</button>
         <button type="button" class="button button-primary" id="share-button">แชร์บิลด์ <span aria-hidden="true">↗</span></button>
       </div>
     </header>
 
-    <section class="hero" aria-label="แนะนำเว็บ">
+    <section class="hero" aria-label="ภาพรวมเครื่องมือ">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="eyebrow-dot"></span> CHARACTER BONUS PLANNER</div>
-        <h1>เลือกบัฟให้ครบ <span>จบในหน้าเดียว</span></h1>
-        <p>รวมโบนัสจาก 6 ระบบของ EDDGA Hi-Class เลือกระดับและออฟชั่นที่มีจริง แล้วดูผลรวมพร้อมรายละเอียดการคำนวณทันที</p>
+        <div class="eyebrow"><span class="eyebrow-dot"></span> EDDGA HI-CLASS · BUFF PLANNER</div>
+        <h1>ตั้งค่าบัฟ <span>ดูผลรวมทันที</span></h1>
       </div>
       <div class="hero-stats" aria-label="สถานะตัวเลือก">
-        <div class="hero-stat"><strong id="active-system-count">0<span>/6</span></strong><small>หมวดที่มีโบนัส</small></div>
+        <div class="hero-stat"><strong id="active-system-count">0<span>/6</span></strong><small>หมวดที่ใช้งาน</small></div>
         <div class="hero-stat-divider"></div>
         <div class="hero-stat"><strong id="chosen-option-count">0<span>/6</span></strong><small>ออฟชั่นที่เลือก</small></div>
       </div>
@@ -44,10 +463,11 @@
     <div class="workspace">
       <main class="system-column" id="buff-settings">
         <div class="section-heading">
-          <div><div class="section-kicker">01 — BUFF SETTINGS</div><h2>ตั้งค่าบัฟของตัวละคร</h2></div>
-          <div class="section-hint">เปิด / ปิดหมวดได้โดยไม่ล้างค่าที่เลือก</div>
+          <div><div class="section-kicker">BUFF SETTINGS</div><h2>บัฟตัวละคร</h2></div>
+          <div class="section-hint">เลือกเลเวลแล้วรวมผลทันที</div>
         </div>
 
+        <div class="quick-settings-grid">
         <section class="system-card" id="card-guild" data-system="guild" aria-labelledby="heading-guild">
           <div class="card-top">
             <div class="card-identity"><span class="index-badge">01</span><div><h3 id="heading-guild">Guild Buff System</h3><p>โบนัสจากระดับกิลด์</p></div></div>
@@ -83,9 +503,11 @@
           </div>
         </section>
 
+        </div>
+
         <div class="section-heading section-heading-spaced">
-          <div><div class="section-kicker">02 — REFINE OPTIONS</div><h2>ออฟชั่นจากการตีบวก</h2></div>
-          <div class="section-hint">แต่ละชิ้นเลือกได้ 1 ออฟชั่นเท่านั้น</div>
+          <div><div class="section-kicker">REFINE OPTIONS</div><h2>ออฟชั่นตีบวก</h2></div>
+          <div class="section-hint">1 ชิ้น = 1 ออฟชั่น</div>
         </div>
 
         <section class="system-card" id="card-weapon" data-system="weapon" aria-labelledby="heading-weapon">
@@ -109,8 +531,9 @@
             <div class="card-actions"><span class="status-badge" id="status-armor">0 / 5 ชิ้น</span><label class="switch" title="เปิดหรือปิด Armor Refine"><input type="checkbox" data-enable="armor" checked aria-label="เปิดหรือปิด Armor Refine"><span class="switch-track"></span></label><button class="fold-button" type="button" data-fold="armor" aria-label="ย่อหรือขยาย Armor Refine" aria-expanded="true">⌄</button></div>
           </div>
           <div class="card-content" id="content-armor">
+            <div class="armor-table-header" aria-hidden="true"><span>ช่องอุปกรณ์</span><span>ตีบวก</span><span>ออฟชั่น (เลือก 1)</span><span>โบนัส</span></div>
             <div id="armor-list" class="armor-list"></div>
-            <p class="note note-warning"><span aria-hidden="true">!</span> <strong>ยกเว้น:</strong> Cotton Shirt [1], Adventurer's Suit [1], Jacket [1], Hood [1] และ Sandals [1] ไม่ได้รับออฟชั่นตีบวกตามเอกสารเซิร์ฟเวอร์</p>
+            <details class="compact-note"><summary>อุปกรณ์ที่ไม่ได้รับ Refine Options</summary><p>Cotton Shirt [1], Adventurer's Suit [1], Jacket [1], Hood [1] และ Sandals [1] ไม่ได้รับออฟชั่นตีบวกตามเอกสารเซิร์ฟเวอร์</p></details>
           </div>
         </section>
 
@@ -122,7 +545,7 @@
           <div class="card-content" id="content-pass">
             <div class="field-row"><label for="pass-level">Set Refine ที่ผ่านเงื่อนไขจริง</label><select id="pass-level" data-level="pass"></select></div>
             <div class="bonus-preview" id="preview-pass" aria-live="polite"></div>
-            <p class="note"><span aria-hidden="true">i</span> เลือกขั้นที่ได้รับจริงเท่านั้น ระบบนี้ไม่ได้ตรวจอัตโนมัติว่าอุปกรณ์ทุกชิ้นผ่านเงื่อนไข Set หรือไม่</p>
+            <p class="note pass-hint"><span aria-hidden="true">i</span> เลือก Set ที่ผ่านเงื่อนไขจริง (ระบบไม่ตรวจคุณสมบัติชุดอัตโนมัติ)</p>
           </div>
         </section>
       </main>
@@ -141,7 +564,7 @@
     <footer class="site-footer">
       <div><strong>EDDGA Buff Calculator</strong><p>เครื่องมือช่วยวางแผนบัฟ ไม่ใช่เครื่องมืออย่างเป็นทางการของเซิร์ฟเวอร์</p></div>
       <div class="source-links">
-        <span>ข้อมูลอ้างอิง:</span>
+        <span>เอกสารอ้างอิง:</span>
         <a href="https://eddga-hiclass.gitbook.io/eddga-hiclass-docs/refine-option-system/weapon-refine-options" target="_blank" rel="noopener noreferrer">Weapon</a>
         <a href="https://eddga-hiclass.gitbook.io/eddga-hiclass-docs/refine-option-system/armor-refine-options" target="_blank" rel="noopener noreferrer">Armor</a>
         <a href="https://eddga-hiclass.gitbook.io/eddga-hiclass-docs/refine-pass-system" target="_blank" rel="noopener noreferrer">Refine Pass</a>
@@ -150,5 +573,764 @@
   </div>
   <button class="mobile-jump" type="button" id="mobile-jump" aria-label="ดูสรุปโบนัสรวม"><span>ดูโบนัสรวม</span><strong id="mobile-drop">Drop +0%</strong><span aria-hidden="true">↑</span></button>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+/* EDDGA Hi-Class buff tables. Source URLs are listed in README.md.
+   Percentages are numeric percentage POINT bonuses; flat values are absolute.
+   Refine rows are in the order +5, +6, +7, +8, +9, +10. */
+(function (root) {
+  'use strict';
+
+  const STAT_META = {
+    drop_pct:           { label: 'Drop',                 unit: '%', group: 'ฟาร์ม / ทรัพยากร', order: 1 },
+    exp_pct:            { label: 'EXP',                  unit: '%', group: 'ฟาร์ม / ทรัพยากร', order: 2 },
+    weight_flat:        { label: 'น้ำหนักบรรทุก',          unit: '',  group: 'ฟาร์ม / ทรัพยากร', order: 3 },
+    atk_pct:            { label: 'ATK',                  unit: '%', group: 'พลังโจมตี', order: 10 },
+    matk_pct:           { label: 'MATK',                 unit: '%', group: 'พลังโจมตี', order: 11 },
+    atk_flat:           { label: 'ATK',                  unit: '',  group: 'พลังโจมตี', order: 12 },
+    matk_flat:          { label: 'MATK',                 unit: '',  group: 'พลังโจมตี', order: 13 },
+    boss_damage_pct:    { label: 'โจมตี Boss แรงขึ้น',     unit: '%', group: 'พลังโจมตี', order: 14 },
+    all_size_damage_pct:{ label: 'โจมตีทุกขนาดแรงขึ้น',   unit: '%', group: 'พลังโจมตี', order: 15 },
+    element_damage_pct: { label: 'โจมตีทุกธาตุแรงขึ้น',    unit: '%', group: 'พลังโจมตี', order: 16 },
+    player_damage_pct:  { label: 'โจมตีผู้เล่นแรงขึ้น',    unit: '%', group: 'พลังโจมตี', order: 17 },
+    pvp_physical_pct:   { label: 'กายภาพต่อผู้เล่นมนุษย์',unit: '%', group: 'พลังโจมตี', order: 18 },
+    close_damage_pct:   { label: 'โจมตีระยะใกล้แรงขึ้น',  unit: '%', group: 'พลังโจมตี', order: 19 },
+    ranged_damage_pct:  { label: 'โจมตีระยะไกลแรงขึ้น',    unit: '%', group: 'พลังโจมตี', order: 20 },
+    critical_damage_pct:{ label: 'ความแรง Critical',      unit: '%', group: 'พลังโจมตี', order: 21 },
+    critical_flat:      { label: 'Critical',              unit: '',  group: 'พลังโจมตี', order: 22 },
+    hit_flat:           { label: 'HIT',                   unit: '',  group: 'พลังโจมตี', order: 23 },
+    hp_pct:             { label: 'Max HP',               unit: '%', group: 'HP / SP', order: 30 },
+    sp_pct:             { label: 'Max SP',               unit: '%', group: 'HP / SP', order: 31 },
+    hp_flat:            { label: 'Max HP',               unit: '',  group: 'HP / SP', order: 32 },
+    sp_flat:            { label: 'Max SP',               unit: '',  group: 'HP / SP', order: 33 },
+    boss_resist_pct:    { label: 'ป้องกัน Boss',          unit: '%', group: 'พลังป้องกัน', order: 40 },
+    all_size_resist_pct:{ label: 'ป้องกันทุกขนาด',        unit: '%', group: 'พลังป้องกัน', order: 41 },
+    all_type_resist_pct:{ label: 'ป้องกันทุกประเภท',      unit: '%', group: 'พลังป้องกัน', order: 42 },
+    human_resist_pct:   { label: 'ป้องกันมนุษย์',          unit: '%', group: 'พลังป้องกัน', order: 43 },
+    human_player_resist_pct:{label:'ลดดาเมจจากผู้เล่นมนุษย์',unit:'%',group:'พลังป้องกัน',order:44},
+    ranged_resist_pct:  { label: 'ป้องกันระยะไกล',        unit: '%', group: 'พลังป้องกัน', order: 45 },
+    element_resist_pct: { label: 'ป้องกันทุกธาตุ',         unit: '%', group: 'พลังป้องกัน', order: 46 },
+    def_flat:           { label: 'DEF',                   unit: '',  group: 'พลังป้องกัน', order: 47 },
+    mdef_flat:          { label: 'MDEF',                  unit: '',  group: 'พลังป้องกัน', order: 48 },
+    aspd_pct:           { label: 'ASPD',                  unit: '%', group: 'ความสามารถเพิ่มเติม', order: 50 },
+    cast_reduction_pct: { label: 'ลดเวลาร่ายเวท',         unit: '%', group: 'ความสามารถเพิ่มเติม', order: 51 },
+    delay_reduction_pct:{ label: 'ลดดีเลย์',              unit: '%', group: 'ความสามารถเพิ่มเติม', order: 52 },
+    flee_flat:          { label: 'FLEE',                  unit: '',  group: 'ความสามารถเพิ่มเติม', order: 53 },
+    all_stats_flat:     { label: 'All Stats',             unit: '',  group: 'ค่าสเตตัส', order: 60 },
+    str_flat:           { label: 'STR',                   unit: '',  group: 'ค่าสเตตัส', order: 61 },
+    agi_flat:           { label: 'AGI',                   unit: '',  group: 'ค่าสเตตัส', order: 62 },
+    vit_flat:           { label: 'VIT',                   unit: '',  group: 'ค่าสเตตัส', order: 63 },
+    int_flat:           { label: 'INT',                   unit: '',  group: 'ค่าสเตตัส', order: 64 },
+    dex_flat:           { label: 'DEX',                   unit: '',  group: 'ค่าสเตตัส', order: 65 },
+    luk_flat:           { label: 'LUK',                   unit: '',  group: 'ค่าสเตตัส', order: 66 }
+  };
+
+  const guild = [
+    { level: 1, bonuses: {drop_pct:3,exp_pct:10,hp_pct:2,sp_pct:2,atk_pct:1,matk_pct:1,pvp_physical_pct:1,human_player_resist_pct:1,weight_flat:200} },
+    { level: 2, bonuses: {drop_pct:6,exp_pct:20,hp_pct:4,sp_pct:4,atk_pct:2,matk_pct:2,pvp_physical_pct:2,human_player_resist_pct:2,weight_flat:250} },
+    { level: 3, bonuses: {drop_pct:9,exp_pct:30,hp_pct:6,sp_pct:6,atk_pct:3,matk_pct:3,pvp_physical_pct:3,human_player_resist_pct:3,weight_flat:300} },
+    { level: 4, bonuses: {drop_pct:12,exp_pct:40,hp_pct:8,sp_pct:8,atk_pct:4,matk_pct:4,pvp_physical_pct:4,human_player_resist_pct:4,weight_flat:350} },
+    { level: 5, bonuses: {drop_pct:15,exp_pct:50,hp_pct:10,sp_pct:10,atk_pct:5,matk_pct:5,pvp_physical_pct:5,human_player_resist_pct:5,weight_flat:500,all_stats_flat:1} }
+  ];
+
+  const donate = [
+    {level:1,requiredBaht:1000,bonuses:{drop_pct:1,atk_pct:1,matk_pct:1}},
+    {level:2,requiredBaht:3000,bonuses:{drop_pct:3,atk_pct:3,matk_pct:3,hp_pct:1,sp_pct:1}},
+    {level:3,requiredBaht:5000,bonuses:{drop_pct:5,atk_pct:5,matk_pct:5,hp_pct:2,sp_pct:2}},
+    {level:4,requiredBaht:10000,bonuses:{drop_pct:10,atk_pct:7,matk_pct:7,hp_pct:3,sp_pct:3,all_size_resist_pct:3,all_stats_flat:1}},
+    {level:5,requiredBaht:30000,bonuses:{drop_pct:15,atk_pct:10,matk_pct:10,hp_pct:4,sp_pct:4,all_size_resist_pct:5,all_stats_flat:2}},
+    {level:6,requiredBaht:50000,bonuses:{drop_pct:20,atk_pct:13,matk_pct:13,hp_pct:5,sp_pct:5,all_size_resist_pct:7,all_stats_flat:3}},
+    {level:7,requiredBaht:100000,bonuses:{drop_pct:30,atk_pct:15,matk_pct:15,hp_pct:10,sp_pct:10,all_size_resist_pct:10,all_stats_flat:3}}
+  ];
+
+  const boss = [
+    {level:1,kills:20,zeny:2000000,bonuses:{drop_pct:2,boss_damage_pct:2,boss_resist_pct:2}},
+    {level:2,kills:40,zeny:4000000,bonuses:{drop_pct:4,boss_damage_pct:4,boss_resist_pct:4}},
+    {level:3,kills:60,zeny:8000000,bonuses:{drop_pct:6,boss_damage_pct:6,boss_resist_pct:6,atk_pct:2,matk_pct:2,hp_flat:200,sp_flat:30}},
+    {level:4,kills:80,zeny:16000000,bonuses:{drop_pct:8,boss_damage_pct:8,boss_resist_pct:8,atk_pct:4,matk_pct:4,hp_flat:400,sp_flat:60}},
+    {level:5,kills:100,zeny:32000000,bonuses:{drop_pct:10,boss_damage_pct:10,boss_resist_pct:10,atk_pct:5,matk_pct:5,hp_flat:500,sp_flat:100,weight_flat:500}}
+  ];
+
+  const pass = [
+    {level:5,bonuses:{drop_pct:2,atk_pct:1,matk_pct:1,hp_pct:2,weight_flat:200}},
+    {level:6,bonuses:{drop_pct:4,atk_pct:2,matk_pct:2,hp_pct:3,weight_flat:300}},
+    {level:7,bonuses:{drop_pct:6,atk_pct:3,matk_pct:3,hp_pct:4,weight_flat:400}},
+    {level:8,bonuses:{drop_pct:8,atk_pct:4,matk_pct:4,hp_pct:5,weight_flat:500}},
+    {level:9,bonuses:{drop_pct:10,atk_pct:5,matk_pct:5,hp_pct:6,weight_flat:600}},
+    {level:10,bonuses:{drop_pct:15,atk_pct:10,matk_pct:10,hp_pct:10,all_stats_flat:1,all_type_resist_pct:3,weight_flat:1000}}
+  ];
+
+  const V = {
+    stat:   [1,1,2,2,3,3],
+    attack: [5,10,15,20,25,30],
+    aspd:   [1,1,2,3,4,7],
+    aspdFast:[1,2,3,4,5,7],
+    dmg:    [1,2,3,4,5,7],
+    pvp:    [1,1,2,3,4,5],
+    boss:   [3,6,9,13,17,20],
+    bossAxe2:[3,6,9,13,15,20],
+    critDagger:[3,6,9,13,15,17],
+    critKatar:[1,2,4,6,8,10],
+    def:    [1,1,2,3,4,5],
+    defMusical:[1,1,2,2,3,3],
+    cast:   [1,2,3,4,5,7],
+    hp:     [100,200,300,400,500,1000]
+  };
+  const row = (stat, values) => ({stat, values: Array.isArray(values) ? values : V[values]});
+  const physicalSwords = [
+    row('str_flat','stat'),row('agi_flat','stat'),row('int_flat','stat'),
+    row('atk_flat','attack'),row('hit_flat','attack'),row('boss_damage_pct','boss'),
+    row('aspd_pct','aspd'),row('player_damage_pct','pvp'),row('close_damage_pct','dmg')
+  ];
+  const physicalAxes = (bossSeries) => [
+    row('str_flat','stat'),row('agi_flat','stat'),row('vit_flat','stat'),
+    row('atk_flat','attack'),row('hit_flat','attack'),row('aspd_pct','aspd'),
+    row('all_size_damage_pct','dmg'),row('player_damage_pct','pvp'),
+    row('boss_damage_pct',bossSeries)
+  ];
+  const magicWeapons = [
+    row('vit_flat','stat'),row('int_flat','stat'),row('dex_flat','stat'),
+    row('def_flat','def'),row('matk_flat','attack'),row('element_damage_pct','dmg'),
+    row('delay_reduction_pct','cast'),row('cast_reduction_pct','cast'),row('human_resist_pct','pvp')
+  ];
+  const musicalWeapons = [
+    row('vit_flat','stat'),row('int_flat','stat'),row('dex_flat','stat'),
+    row('def_flat','defMusical'),row('hp_flat','hp'),row('aspd_pct','aspdFast'),
+    row('delay_reduction_pct','pvp'),row('ranged_resist_pct','pvp'),row('human_resist_pct','pvp')
+  ];
+  const weapons = [
+    {id:'dagger',label:'Dagger',options:[
+      row('str_flat','stat'),row('agi_flat','stat'),row('vit_flat','stat'),
+      row('atk_flat','attack'),row('hit_flat','attack'),
+      row('critical_damage_pct','critDagger'),row('critical_flat','critDagger'),
+      row('boss_damage_pct',[3,6,9,13,15,20]),row('aspd_pct','aspd'),row('all_size_damage_pct','dmg')
+    ]},
+    {id:'one-hand-sword',label:'One Hand Sword',options:physicalSwords},
+    {id:'two-hand-sword',label:'Two Hand Sword',options:physicalSwords},
+    {id:'one-hand-spear',label:'One Hand Spear',options:physicalSwords},
+    {id:'two-hand-spear',label:'Two Hand Spear',options:physicalSwords},
+    {id:'mace',label:'Mace',options:physicalAxes('boss')},
+    {id:'bow',label:'Bow',options:[
+      row('agi_flat','stat'),row('dex_flat','stat'),row('luk_flat','stat'),
+      row('atk_flat','attack'),row('hit_flat','attack'),row('aspd_pct','aspd'),
+      row('ranged_damage_pct','dmg'),row('critical_damage_pct','dmg'),
+      row('player_damage_pct','pvp'),row('boss_damage_pct','boss')
+    ]},
+    {id:'one-hand-axe',label:'One Hand Axe',options:physicalAxes('boss')},
+    {id:'two-hand-axe',label:'Two Hand Axe',options:physicalAxes('bossAxe2')},
+    {id:'one-hand-staff',label:'One Hand Staff',options:magicWeapons},
+    {id:'two-hand-staff',label:'Two Hand Staff',options:magicWeapons},
+    {id:'book',label:'Book',options:magicWeapons},
+    {id:'katar',label:'Katar',options:[
+      row('str_flat','stat'),row('agi_flat','stat'),row('vit_flat','stat'),
+      row('atk_flat','attack'),row('hit_flat','attack'),row('aspd_pct','aspdFast'),
+      row('critical_damage_pct','critKatar'),row('critical_flat','critKatar'),
+      row('player_damage_pct','pvp'),row('boss_damage_pct','boss')
+    ]},
+    {id:'knuckle',label:'Knuckle',options:[
+      row('agi_flat','stat'),row('str_flat','stat'),row('dex_flat','stat'),
+      row('atk_flat','attack'),row('hit_flat','attack'),row('aspd_pct','aspdFast'),
+      row('cast_reduction_pct','pvp'),row('player_damage_pct','pvp'),row('boss_damage_pct','boss')
+    ]},
+    {id:'musical',label:'Musical',options:musicalWeapons},
+    {id:'whip',label:'Whip',options:musicalWeapons}
+  ];
+
+  const armorSlots = [
+    {id:'helm',label:'Helm',subtitle:'หมวก',options:[
+      row('exp_pct',[5,10,15,20,25,30]),row('drop_pct',[2,3,4,5,6,7]),
+      row('atk_pct',[1,1,2,3,4,5]),row('matk_pct',[1,1,2,3,4,5]),
+      row('atk_flat',[5,10,15,20,30,50]),row('matk_flat',[5,10,15,20,30,50]),
+      row('hp_flat',[100,200,300,400,500,1000]),row('sp_flat',[20,40,60,80,100,200]),
+      row('aspd_pct','aspd'),row('def_flat','def'),row('human_resist_pct','pvp'),row('ranged_resist_pct','pvp')
+    ]},
+    {id:'armor',label:'Armor',subtitle:'เสื้อเกราะ',options:[
+      row('exp_pct',[5,10,15,20,25,30]),row('drop_pct',[2,3,4,5,6,7]),
+      row('atk_pct',[1,2,3,4,5,5]),row('matk_pct',[1,2,3,4,5,5]),
+      row('hp_pct',[1,2,3,4,5,5]),row('sp_pct',[1,2,3,4,5,5]),
+      row('critical_damage_pct',[3,6,9,12,15,17]),row('human_resist_pct','pvp'),
+      row('ranged_resist_pct','pvp'),row('cast_reduction_pct',[1,2,3,4,5,6]),
+      row('flee_flat',[2,4,6,8,10,15]),row('hit_flat','attack')
+    ]},
+    {id:'shield',label:'Shield',subtitle:'โล่',options:[
+      row('def_flat','def'),row('mdef_flat','def'),
+      row('hp_flat',[100,200,300,400,500,1000]),row('sp_flat',[20,40,60,80,100,200]),
+      row('element_resist_pct',[1,2,3,4,5,7]),row('boss_resist_pct',[5,10,15,20,25,30]),
+      row('human_resist_pct','pvp'),row('ranged_resist_pct','pvp'),
+      row('cast_reduction_pct',[1,2,3,4,5,6]),row('delay_reduction_pct','pvp')
+    ]},
+    {id:'garment',label:'Garment',subtitle:'ผ้าคลุม',options:[
+      row('exp_pct',[5,10,15,20,25,30]),row('drop_pct',[2,3,4,5,6,7]),
+      row('atk_pct',[1,2,3,4,5,6]),row('matk_pct',[1,2,3,4,5,6]),
+      row('atk_flat',[5,10,15,20,30,50]),row('matk_flat',[5,10,15,20,30,50]),
+      row('aspd_pct','aspd'),row('human_resist_pct','pvp'),row('ranged_resist_pct','pvp'),
+      row('flee_flat',[3,6,10,15,20,30]),row('hit_flat','attack')
+    ]},
+    {id:'boots',label:'Boots',subtitle:'รองเท้า',options:[
+      row('exp_pct',[5,10,15,20,25,30]),row('drop_pct',[2,3,4,5,6,7]),
+      row('atk_pct',[1,2,3,4,5,6]),row('matk_pct',[1,2,3,4,5,6]),
+      row('hp_flat',[100,200,300,400,500,1000]),row('sp_flat',[20,40,60,80,100,200]),
+      row('aspd_pct','aspd'),row('def_flat','def'),row('human_resist_pct','pvp'),
+      row('ranged_resist_pct','pvp'),row('delay_reduction_pct','pvp'),
+      row('cast_reduction_pct',[1,2,3,4,5,6])
+    ]}
+  ];
+
+  const DATA = {
+    updated:'2026-11-13',
+    stats:STAT_META,
+    guild, donate, boss, pass, weapons, armorSlots,
+    refineLevels:[5,6,7,8,9,10],
+    noOptionArmor:['Cotton Shirt [1]','Adventurer\'s Suit [1]','Jacket [1]','Hood [1]','Sandals [1]'],
+    sources: {
+      weapon:'https://eddga-hiclass.gitbook.io/eddga-hiclass-docs/refine-option-system/weapon-refine-options',
+      armor:'https://eddga-hiclass.gitbook.io/eddga-hiclass-docs/refine-option-system/armor-refine-options',
+      pass:'https://eddga-hiclass.gitbook.io/eddga-hiclass-docs/refine-pass-system'
+    }
+  };
+  root.EDDGA_DATA=DATA;
+  if(typeof module !== 'undefined' && module.exports) module.exports=DATA;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+  </script>
+  <script>
+/* Pure calculation + state validation. No DOM or network dependencies. */
+(function (root) {
+  'use strict';
+
+  const GROUPS = ['guild','donate','boss','weapon','armor','pass'];
+
+  function createDefaultState(data) {
+    const slots = {};
+    data.armorSlots.forEach(slot => { slots[slot.id] = {refine:0, option:''}; });
+    return {
+      v:1,
+      guild:{enabled:true,level:0},
+      donate:{enabled:true,level:0},
+      boss:{enabled:true,level:0},
+      weapon:{enabled:true,type:'',refine:0,option:''},
+      armor:{enabled:true,slots},
+      pass:{enabled:true,level:0}
+    };
+  }
+
+  function permittedLevel(raw, allowed) {
+    const number = Number(raw);
+    return Number.isInteger(number) && allowed.includes(number) ? number : 0;
+  }
+
+  function sanitizeState(raw, data) {
+    const state = createDefaultState(data);
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return state;
+    GROUPS.forEach(key => {
+      if (raw[key] && typeof raw[key] === 'object' && typeof raw[key].enabled === 'boolean') {
+        state[key].enabled = raw[key].enabled;
+      }
+    });
+    for (const key of ['guild','donate','boss','pass']) {
+      const source = raw[key] || {};
+      const allowed = data[key].map(x => x.level);
+      state[key].level = permittedLevel(source.level, [0, ...allowed]);
+    }
+    const weapon = raw.weapon || {};
+    const type = data.weapons.find(x => x.id === weapon.type);
+    state.weapon.type = type ? type.id : '';
+    state.weapon.refine = permittedLevel(weapon.refine, [0, ...data.refineLevels]);
+    state.weapon.option = type && type.options.some(x => x.stat === weapon.option) ? weapon.option : '';
+    if (!state.weapon.type || !state.weapon.refine) state.weapon.option = '';
+
+    const slots = (raw.armor && raw.armor.slots && typeof raw.armor.slots === 'object') ? raw.armor.slots : {};
+    data.armorSlots.forEach(slot => {
+      const previous = slots[slot.id] || {};
+      state.armor.slots[slot.id].refine = permittedLevel(previous.refine, [0, ...data.refineLevels]);
+      const validOption = slot.options.some(x => x.stat === previous.option);
+      state.armor.slots[slot.id].option = validOption && state.armor.slots[slot.id].refine ? previous.option : '';
+    });
+    return state;
+  }
+
+  function selectedRow(rows, level) {
+    return rows.find(x => x.level === level);
+  }
+
+  function optionValue(rows, level, optionId) {
+    if (!Number.isInteger(level) || level < 5 || level > 10) return null;
+    const item = rows.find(x => x.stat === optionId);
+    if (!item) return null;
+    const value = item.values[level - 5];
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+  }
+
+  function calculate(inputState, data) {
+    const state = sanitizeState(inputState, data);
+    const totals = {};
+    const breakdown = {};
+    const sources = [];
+    const selectedSystems = [];
+    let optionCount = 0;
+
+    function add(sourceId, sourceLabel, bonuses) {
+      let hasStat = false;
+      Object.entries(bonuses || {}).forEach(([stat, value]) => {
+        if (!data.stats[stat] || !Number.isFinite(value) || value === 0) return;
+        totals[stat] = (totals[stat] || 0) + value;
+        (breakdown[stat] ||= []).push({sourceId, source:sourceLabel, value});
+        hasStat = true;
+      });
+      if (hasStat) sources.push({id:sourceId,label:sourceLabel});
+      return hasStat;
+    }
+
+    const namedGroups = [
+      ['guild','Guild Buff','Lv.'],
+      ['donate','Donate Rank','Lv.'],
+      ['boss','Rank Boss','Lv.'],
+      ['pass','Refine Pass','Set +']
+    ];
+    namedGroups.forEach(([key,label,prefix]) => {
+      if (!state[key].enabled || !state[key].level) return;
+      const row = selectedRow(data[key], state[key].level);
+      if (row && add(key, `${label} ${prefix}${state[key].level}`, row.bonuses)) {
+        selectedSystems.push(key);
+      }
+    });
+
+    if (state.weapon.enabled && state.weapon.type && state.weapon.refine && state.weapon.option) {
+      const weapon = data.weapons.find(x => x.id === state.weapon.type);
+      const value = weapon ? optionValue(weapon.options, state.weapon.refine, state.weapon.option) : null;
+      if (value !== null && add('weapon', `Weapon: ${weapon.label} +${state.weapon.refine}`, {[state.weapon.option]:value})) {
+        selectedSystems.push('weapon');
+        optionCount++;
+      }
+    }
+
+    if (state.armor.enabled) {
+      data.armorSlots.forEach(slot => {
+        const settings = state.armor.slots[slot.id];
+        if (!settings.refine || !settings.option) return;
+        const value = optionValue(slot.options, settings.refine, settings.option);
+        if (value !== null && add(`armor-${slot.id}`, `${slot.label} +${settings.refine}`, {[settings.option]:value})) {
+          optionCount++;
+          if (!selectedSystems.includes('armor')) selectedSystems.push('armor');
+        }
+      });
+    }
+
+    return {totals,breakdown,sources,selectedSystems,optionCount,state};
+  }
+
+  function formatBonus(stat, value, data) {
+    const meta = data.stats[stat];
+    const pretty = new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(value || 0);
+    return `${value >= 0 ? '+' : ''}${pretty}${meta && meta.unit === '%' ? '%' : ''}`;
+  }
+
+  const api = {createDefaultState,sanitizeState,calculate,optionValue,formatBonus};
+  root.EDDGA_CALC = api;
+  if(typeof module !== 'undefined' && module.exports) module.exports=api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+  </script>
+  <script>
+/* Website UI: static, no framework and no server required. */
+(function () {
+  'use strict';
+  const DATA = window.EDDGA_DATA;
+  const CALC = window.EDDGA_CALC;
+  if (!DATA || !CALC) {
+    document.body.textContent = 'โหลดข้อมูลไม่สำเร็จ กรุณาตรวจสอบไฟล์ js/data.js และ js/calculator.js';
+    return;
+  }
+
+  const STORAGE_KEY = 'eddga-buff-calculator-v1';
+  const GROUPS = ['guild','donate','boss','weapon','armor','pass'];
+  const find = id => document.getElementById(id);
+  const formatNumber = number => new Intl.NumberFormat('en-US').format(number);
+  const node = (tag, cls, content) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (content !== undefined) n.textContent = content;
+    return n;
+  };
+
+  function decodeToken(token) {
+    if (!token || token.length > 12000 || !/^[A-Za-z0-9_-]+$/.test(token)) return null;
+    try {
+      const padded = token.replace(/-/g,'+').replace(/_/g,'/') + '='.repeat((4 - token.length % 4) % 4);
+      return JSON.parse(atob(padded));
+    } catch (_error) { return null; }
+  }
+
+  function loadState() {
+    const params = new URLSearchParams(window.location.search);
+    const linked = decodeToken(params.get('b'));
+    if (linked) return CALC.sanitizeState(linked,DATA);
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) return CALC.sanitizeState(JSON.parse(saved),DATA);
+    } catch (_error) { /* Some browsers block storage in private mode. */ }
+    return CALC.createDefaultState(DATA);
+  }
+
+  let state = loadState();
+  let toastTimer;
+
+  function persist() {
+    try { localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }
+    catch (_error) { /* Storage unavailable: the calculator still works. */ }
+  }
+
+  function forgetSharedUrl() {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has('b')) return;
+    url.searchParams.delete('b');
+    history.replaceState(null,'',url.pathname + url.search + url.hash);
+  }
+
+  function showToast(message) {
+    const toast = find('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'),2700);
+  }
+
+  function putOptions(select, options, current) {
+    select.replaceChildren();
+    options.forEach(item => select.add(new Option(item.label,String(item.value))));
+    select.value = String(current);
+    if (select.selectedIndex < 0) select.selectedIndex = 0;
+  }
+
+  function levelOptions(section) {
+    const levels = DATA[section];
+    const first = section === 'pass' ? 'ไม่ใช้ Refine Pass' : 'ไม่ใช้โบนัสหมวดนี้';
+    return [{value:0,label:first}, ...levels.map(item => ({
+      value:item.level,
+      label:section === 'pass' ? `Set Refine +${item.level}` : `Lv.${item.level}`
+    }))];
+  }
+
+  function refineOptions() {
+    return [{value:0,label:'ไม่ใช้ / ต่ำกว่า +5'}, ...DATA.refineLevels.map(n => ({value:n,label:`+${n}`}))];
+  }
+
+  function initSelections() {
+    ['guild','donate','boss','pass'].forEach(section => putOptions(find(`${section}-level`),levelOptions(section),0));
+    putOptions(find('weapon-type'),[
+      {value:'',label:'เลือกประเภทอาวุธ'},
+      ...DATA.weapons.map(x => ({value:x.id,label:x.label}))
+    ],'');
+    putOptions(find('weapon-refine'),refineOptions(),0);
+    putOptions(find('weapon-option'),[{value:'',label:'เลือกประเภทอาวุธและระดับตีบวกก่อน'}],'');
+  }
+
+  const armorEls = new Map();
+  function buildArmor() {
+    const container = find('armor-list');
+    for (const slot of DATA.armorSlots) {
+      const wrap = node('div','armor-item');
+      const identity = node('div','armor-ident');
+      identity.append(node('strong','',slot.label),node('small','',slot.subtitle));
+      const refineField = node('div','armor-control');
+      const refineLabel = node('label','','ระดับตีบวก');
+      refineLabel.htmlFor = `armor-refine-${slot.id}`;
+      const refine = node('select');
+      refine.id = refineLabel.htmlFor;
+      refine.dataset.slotRefine = slot.id;
+      putOptions(refine,refineOptions(),0);
+      refineField.append(refineLabel,refine);
+      const optionField = node('div','armor-control');
+      const optionLabel = node('label','','ออฟชั่นที่สุ่มได้ (1 อย่าง)');
+      optionLabel.htmlFor = `armor-option-${slot.id}`;
+      const option = node('select');
+      option.id = optionLabel.htmlFor;
+      option.dataset.slotOption = slot.id;
+      putOptions(option,[{value:'',label:'เลือกระดับตีบวกก่อน'}],'');
+      optionField.append(optionLabel,option);
+      const picked = node('div','armor-value');
+      wrap.append(identity,refineField,optionField,picked);
+      container.append(wrap);
+      armorEls.set(slot.id,{refine,option,picked});
+      refine.addEventListener('change',event => {
+        const newLevel = Number(event.target.value);
+        state.armor.slots[slot.id].refine = newLevel;
+        if (!newLevel) state.armor.slots[slot.id].option = '';
+        stateChanged();
+      });
+      option.addEventListener('change',event => {
+        state.armor.slots[slot.id].option = event.target.value;
+        stateChanged();
+      });
+    }
+  }
+
+  function previewPills(parent,bonuses) {
+    parent.replaceChildren();
+    if (!bonuses || Object.keys(bonuses).length === 0) {
+      parent.append(node('span','preview-empty','เลือกระดับเพื่อดูโบนัสของหมวดนี้'));
+      return;
+    }
+    const sorted = Object.entries(bonuses)
+      .filter(([id]) => DATA.stats[id])
+      .sort((a,b) => DATA.stats[a[0]].order - DATA.stats[b[0]].order);
+    sorted.forEach(([stat,value]) => {
+      const pill = node('div','preview-pill');
+      pill.append(node('span','',DATA.stats[stat].label),node('strong','',CALC.formatBonus(stat,value,DATA)));
+      parent.append(pill);
+    });
+  }
+
+  function requirements(parent,items) {
+    parent.replaceChildren();
+    items.forEach(label => parent.append(node('span','requirement-chip',label)));
+  }
+
+  function setStatus(group,label,active) {
+    const card = find(`card-${group}`);
+    const badge = find(`status-${group}`);
+    card.classList.toggle('is-off',!state[group].enabled);
+    badge.classList.toggle('is-selected',active && state[group].enabled);
+    badge.textContent = state[group].enabled ? label : 'ปิดใช้งาน';
+  }
+
+  function renderLevels() {
+    for (const group of ['guild','donate','boss','pass']) {
+      const selected = state[group];
+      const select = find(`${group}-level`);
+      select.value = String(selected.level);
+      select.disabled = !selected.enabled;
+      const item = DATA[group].find(x => x.level === selected.level);
+      previewPills(find(`preview-${group}`),item?.bonuses);
+      setStatus(group,selected.level ? `${group === 'pass' ? 'Set +' : 'Lv.'}${selected.level}` : 'ยังไม่เลือก',!!item);
+      if(group === 'donate') requirements(find('requirements-donate'),item ? [`ยอดสะสม ${formatNumber(item.requiredBaht)} บาท`] : []);
+      if(group === 'boss') requirements(find('requirements-boss'),item ? [`กำจัด Boss ${formatNumber(item.kills)} ตัว`,`ใช้ ${formatNumber(item.zeny)} Zeny`] : []);
+    }
+  }
+
+  function optionLabels(rows,level) {
+    return [{value:'',label:'เลือกออฟชั่นที่สุ่มได้จริง'},
+      ...rows.map(item => ({
+        value:item.stat,
+        label:`${DATA.stats[item.stat].label} ${CALC.formatBonus(item.stat,CALC.optionValue(rows,level,item.stat),DATA)}`
+      }))];
+  }
+
+  function renderWeapon() {
+    const settings = state.weapon;
+    const weapon = DATA.weapons.find(x => x.id === settings.type);
+    const type = find('weapon-type');
+    const refine = find('weapon-refine');
+    const option = find('weapon-option');
+    type.value = settings.type;
+    refine.value = String(settings.refine);
+    type.disabled = !settings.enabled;
+    refine.disabled = !settings.enabled || !weapon;
+    if (!weapon || !settings.refine) {
+      putOptions(option,[{value:'',label:!weapon ? 'เลือกประเภทอาวุธก่อน' : 'เลือกระดับตีบวกก่อน'}],'');
+      option.disabled = true;
+    } else {
+      putOptions(option,optionLabels(weapon.options,settings.refine),settings.option);
+      option.disabled = !settings.enabled;
+    }
+    const picked = find('weapon-picked');
+    picked.replaceChildren();
+    const value = weapon ? CALC.optionValue(weapon.options,settings.refine,settings.option) : null;
+    const active = value !== null;
+    picked.classList.toggle('active',active && settings.enabled);
+    if (active) {
+      picked.append(node('span','',DATA.stats[settings.option].label),node('strong','',CALC.formatBonus(settings.option,value,DATA)));
+    } else {
+      picked.append(node('span','',weapon && settings.refine ? 'ยังไม่เลือกออฟชั่น (ยังไม่นับโบนัส)' : 'เลือกประเภท + ระดับตีบวก + ออฟชั่น เพื่อเริ่มคำนวณ'));
+    }
+    setStatus('weapon',active ? `${weapon.label} +${settings.refine}` : 'ยังไม่เลือก',active);
+  }
+
+  function renderArmor() {
+    let count = 0;
+    DATA.armorSlots.forEach(slot => {
+      const settings = state.armor.slots[slot.id];
+      const els = armorEls.get(slot.id);
+      els.refine.value = String(settings.refine);
+      els.refine.disabled = !state.armor.enabled;
+      if (!settings.refine) {
+        putOptions(els.option,[{value:'',label:'เลือกระดับตีบวกก่อน'}],'');
+        els.option.disabled = true;
+      } else {
+        putOptions(els.option,optionLabels(slot.options,settings.refine),settings.option);
+        els.option.disabled = !state.armor.enabled;
+      }
+      const value = CALC.optionValue(slot.options,settings.refine,settings.option);
+      const active = value !== null;
+      els.picked.replaceChildren();
+      els.picked.classList.toggle('is-set',active);
+      if (active) {
+        count++;
+        els.picked.append(node('span','',DATA.stats[settings.option].label),node('strong','',CALC.formatBonus(settings.option,value,DATA)));
+      }
+    });
+    setStatus('armor',`${count} / 5 ชิ้น`,count>0);
+  }
+
+  function renderHighlights(totals) {
+    const highlights = [
+      ['DROP','drop_pct'],['EXP','exp_pct'],['ATK %','atk_pct'],
+      ['MATK %','matk_pct'],['Max HP %','hp_pct'],['Max SP %','sp_pct']
+    ];
+    const parent = find('highlight-grid');
+    parent.replaceChildren();
+    highlights.forEach(([label,id]) => {
+      const tile = node('div','highlight-tile');
+      tile.append(node('small','',label),node('strong','',CALC.formatBonus(id,totals[id] || 0,DATA)));
+      parent.append(tile);
+    });
+    find('mobile-drop').textContent = `Drop ${CALC.formatBonus('drop_pct',totals.drop_pct || 0,DATA)}`;
+  }
+
+  function renderBreakdown(result) {
+    const parent = find('stat-list');
+    parent.replaceChildren();
+    const entries = Object.entries(result.totals).sort(([a],[b]) => DATA.stats[a].order - DATA.stats[b].order);
+    find('stat-count').textContent = `${entries.length} รายการ`;
+    if (!entries.length) {
+      const empty = node('div','empty-stats');
+      empty.append(node('span','', '✧'),node('div','','ยังไม่มีบัฟที่เปิดใช้งาน'),node('div','','ลองเลือก Lv.1 หรือกด “โหลดตัวอย่าง”'));
+      parent.append(empty);
+      return;
+    }
+    let currentGroup = '';
+    entries.forEach(([id,total]) => {
+      const stat = DATA.stats[id];
+      if (stat.group !== currentGroup) {
+        currentGroup = stat.group;
+        parent.append(node('div','stat-group-title',currentGroup));
+      }
+      const details = node('details','stat-detail');
+      const summary = node('summary');
+      summary.append(node('span','stat-summary-name',`${stat.label}${stat.unit === '%' ? ' (%)' : ' (ค่า)'}`),node('strong','stat-summary-value',CALC.formatBonus(id,total,DATA)));
+      const items = node('div','breakdown-entries');
+      result.breakdown[id].forEach(item => {
+        const element = node('div','breakdown-entry');
+        element.append(node('span','',item.source),node('strong','',CALC.formatBonus(id,item.value,DATA)));
+        items.append(element);
+      });
+      details.append(summary,items);
+      parent.append(details);
+    });
+  }
+
+  function render() {
+    GROUPS.forEach(group => {
+      const toggle = document.querySelector(`[data-enable="${group}"]`);
+      toggle.checked = state[group].enabled;
+    });
+    renderLevels();
+    renderWeapon();
+    renderArmor();
+    const result = CALC.calculate(state,DATA);
+    renderHighlights(result.totals);
+    renderBreakdown(result);
+    find('active-system-count').replaceChildren(document.createTextNode(String(result.selectedSystems.length)),node('span','','/6'));
+    find('chosen-option-count').replaceChildren(document.createTextNode(String(result.optionCount)),node('span','','/6'));
+    persist();
+  }
+
+  function stateChanged() {
+    forgetSharedUrl();
+    state = CALC.sanitizeState(state,DATA);
+    render();
+  }
+
+  function attachEvents() {
+    document.querySelectorAll('[data-level]').forEach(select => {
+      select.addEventListener('change',event => {
+        const section = event.target.dataset.level;
+        state[section].level = Number(event.target.value);
+        stateChanged();
+      });
+    });
+    document.querySelectorAll('[data-enable]').forEach(toggle => {
+      toggle.addEventListener('change',event => {
+        state[event.target.dataset.enable].enabled = event.target.checked;
+        stateChanged();
+      });
+    });
+    document.querySelectorAll('[data-fold]').forEach(button => {
+      button.addEventListener('click',event => {
+        const section = event.currentTarget.dataset.fold;
+        const panel = find(`content-${section}`);
+        panel.hidden = !panel.hidden;
+        event.currentTarget.setAttribute('aria-expanded',String(!panel.hidden));
+      });
+    });
+    find('weapon-type').addEventListener('change',event => {
+      state.weapon.type = event.target.value;
+      state.weapon.option = '';
+      stateChanged();
+    });
+    find('weapon-refine').addEventListener('change',event => {
+      state.weapon.refine = Number(event.target.value);
+      if (!state.weapon.refine) state.weapon.option = '';
+      stateChanged();
+    });
+    find('weapon-option').addEventListener('change',event => {
+      state.weapon.option = event.target.value;
+      stateChanged();
+    });
+    find('reset-button').addEventListener('click',() => {
+      state = CALC.createDefaultState(DATA);
+      stateChanged();
+      showToast('ล้างค่าทั้งหมดเรียบร้อย');
+    });
+    find('example-button').addEventListener('click',() => {
+      state = CALC.createDefaultState(DATA);
+      state.guild.level = 3;
+      state.donate.level = 2;
+      state.boss.level = 1;
+      state.pass.level = 5;
+      state.weapon.type = 'dagger';
+      state.weapon.refine = 8;
+      state.weapon.option = 'atk_flat';
+      state.armor.slots.helm = {refine:7,option:'drop_pct'};
+      state.armor.slots.armor = {refine:9,option:'hp_pct'};
+      state.armor.slots.boots = {refine:8,option:'aspd_pct'};
+      stateChanged();
+      showToast('โหลดตัวอย่างครบแล้ว ลองปรับออฟชั่นต่อได้เลย');
+    });
+    find('share-button').addEventListener('click',async () => {
+      const payload = btoa(JSON.stringify(state)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      const url = new URL(window.location.href);
+      url.searchParams.set('b',payload);
+      url.hash = '';
+      const text = url.toString();
+      try {
+        if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('Clipboard API unavailable');
+        await navigator.clipboard.writeText(text);
+        showToast('คัดลอกลิงก์ Build แล้ว ส่งให้เพื่อนได้เลย');
+      } catch (_error) {
+        const input = node('textarea');
+        input.value = text;
+        input.style.position = 'fixed';
+        input.style.left = '-9999px';
+        document.body.append(input);
+        input.select();
+        let copied = false;
+        try {copied = document.execCommand('copy');} catch (_e) { /* unavailable */ }
+        input.remove();
+        if (copied) showToast('คัดลอกลิงก์ Build แล้ว ส่งให้เพื่อนได้เลย');
+        else window.prompt('คัดลอกลิงก์ Build นี้:',text);
+      }
+    });
+    find('mobile-jump').addEventListener('click',() => {
+      find('result-section').scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  }
+
+  initSelections();
+  buildArmor();
+  attachEvents();
+  render();
+})();
+
+  </script>
 </body>
 </html>
